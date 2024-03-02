@@ -63,9 +63,9 @@ void Movimentacao() {
   static int movimento = 0;
   static bool direcao = true; 
   int cont=0;
-  //rightInfSensor = digitalRead(rightInfSensor);
-  //leftInfSensor = digitalRead(leftInfSensor);
-  //middleInfSensor = digitalRead(middleInfSensor);
+  rightInfSensor = digitalRead(rightInfSensor);
+  leftInfSensor = digitalRead(leftInfSensor);
+  middleInfSensor = digitalRead(middleInfSensor);
 
   if (digitalRead(middleInfSensor)) {
     MotorWrite(130, 130);
