@@ -1,9 +1,10 @@
-#include <ESP32Servo.h>
-
 // Code made by Nick
 // Contact: nicolas_castrosilva@outlook.com
 
 //Servo Libraries
+
+#include <ESP32Servo.h>
+#include <Arduino.h>
 
 //PS4 Controller Libraries
 #include <ps4.h>
@@ -26,36 +27,38 @@ bool optionPressed = false;
 IRrecv irrecv(irReceiverPin);
 decode_results results;
 
-//Edge Sensors Pins and Variables
-//#define leftSensorPin 27
-//#define rightSensorPin 26
-
-//int leftSensorRef = 0;
-//int rightSensorRef = 0;
-//int rightSensorTolerance = 500;
-//int leftSensorTolerance = 500;
-//bool rightReading = true;
-//int rightSensor = 0;
-//int leftSensor = 0;
-
-//Presence Sensor Pins and Variables
-#define middleInfSensor 19//18
-#define rightInfSensor 16//17 5
-#define leftInfSensor 17 //23 22 
+//Presence Sensor Pins and Variables on the board
+#define rightInfSensor 5 //17 5
+#define leftInfSensor 19 //23 22 
+#define middleInfSensor 18
 #define leftInfSensorRef 99 //INSERIR O NUMERO NO ESP
 #define rightInfSensorRef 98 //INSERIR O NUMERO NO ESP
-//Auto mode states of operation
+
+void sensorTest();
+void Status_Verify();
+void MotorWrite();
+void Controlado();
+void IRRead();
+void Suicidio();
+void Radar();
+void fradar();
+void Auto();
+void ManualControl();
+void Teste();
+
+//Auto mode states of operation (1,2,3 TV controll)
 enum autoStates {
-  STOPPED, READY, RUNNING
+  READY, RUNNING, STOPPED
 };
 autoStates autoState = STOPPED;
 
 enum tatics {
-   RADAR//,STAR
-,MOVIMENTACAO
+   RADAR,
+   SUICIDIO,
+   MOVIMENTACAO
+   //TESTE
 };
 tatics tatic = RADAR;
-tatics tatic2 = MOVIMENTACAO;
 
 //PS4 LED status variables
 unsigned long blinkTimer;
@@ -75,17 +78,15 @@ void setup() {
 
   irrecv.enableIRIn(); //Enable IR Receiver
 
-  //PS4.begin("70:77:81:d5:f8:42"); //Start Connection between ESP32 and PS4 Controller
-  //PS4.begin("60:5b:b4:56:c5:fa");
-  //PS4.begin("d8:08:31:2f:50:f7");
-  PS4.begin("a8:47:4a:ed:40:64");//
+  //Start Connection between ESP32 and PS4 Controller
+  PS4.begin("44:1c:a8:c6:41:80");
   while (!PS4.isConnected()) {
     Serial.println("WatingConnection");
     delay(250);
   }
 
   pinMode(leftInfSensor, INPUT);
-  //pinMode(middleInfSensor, INPUT);
+  pinMode(middleInfSensor, INPUT);
   pinMode(rightInfSensor, INPUT);
 
   PS4.setLed(100, 0, 0);
@@ -116,9 +117,9 @@ void sensorTest() {
   if (digitalRead(leftInfSensor)) {
     Serial.println("Left");
   }
-  //if (digitalRead(middleInfSensor)) {
-  //  Serial.println("Middle");
- // }
+  if (digitalRead(middleInfSensor)) {
+    Serial.println("Middle");
+  }
   if (digitalRead(rightInfSensor)) {
     Serial.println("Right");
   }
@@ -171,67 +172,3 @@ void MotorWrite(int ppmDireito, int ppmEsquerdo) {
   MotorDireito.write(ppmDireito);
   MotorEsquerdo.write(ppmEsquerdo);
 }
-
-
-//    // Below has all accessible outputs from the controller
-//    if (PS4.isConnected()) {
-//      if (PS4.Right()) Serial.println("Right Button");
-//      if (PS4.Down()) Serial.println("Down Button");
-//      if (PS4.Up()) Serial.println("Up Button");
-//      if (PS4.Left()) Serial.println("Left Button");
-//
-//      if (PS4.Square()) Serial.println("Square Button");
-//      if (PS4.Cross()) Serial.println("Cross Button");
-//      if (PS4.Circle()) Serial.println("Circle Button");
-//      if (PS4.Triangle()) Serial.println("Triangle Button");
-//
-//      if (PS4.UpRight()) Serial.println("Up Right");
-//      if (PS4.DownRight()) Serial.println("Down Right");
-//      if (PS4.UpLeft()) Serial.println("Up Left");
-//      if (PS4.DownLeft()) Serial.println("Down Left");
-//
-//      if (PS4.L1()) Serial.println("L1 Button");
-//      if (PS4.R1()) Serial.println("R1 Button");
-//
-//      if (PS4.Share()) Serial.println("Share Button");
-//      if (PS4.Options()) Serial.println("Options Button");
-//      if (PS4.L3()) Serial.println("L3 Button");
-//      if (PS4.R3()) Serial.println("R3 Button");
-//
-//      if (PS4.PSButton()) Serial.println("PS Button");
-//      if (PS4.Touchpad()) Serial.println("Touch Pad Button");
-//
-//      if (PS4.L2()) {
-//        Serial.printf("L2 button at %d\n", PS4.L2Value());
-//      }
-//      if (PS4.R2()) {
-//        Serial.printf("R2 button at %d\n", PS4.R2Value());
-//      }
-
-//    if (PS4.LStickX()) {
-//      Serial.printf("Left Stick x at %d\n", PS4.LStickX());
-//    }
-//    if (PS4.LStickY()) {
-//      Serial.printf("Left Stick y at %d\n", PS4.LStickY());
-//    }
-//    if (PS4.RStickX()) {
-//      Serial.printf("Right Stick x at %d\n", PS4.RStickX());
-//    }
-//    if (PS4.RStickY()) {
-//      Serial.printf("Right Stick y at %d\n", PS4.RStickY());
-//    }
-//
-//    if (PS4.Charging()) Serial.println("The controller is charging");
-//    if (PS4.Audio()) Serial.println("The controller has headphones attached");
-//    if (PS4.Mic()) Serial.println("The controller has a mic attached");
-//
-//    Serial.printf("Battery Level : %d\n", PS4.Battery());
-//
-//    Serial.println();
-//    // This delay is to make the output more human readable
-//    // Remove it when you're not trying to see the output
-//    delay(1000);
-
-
-
-
