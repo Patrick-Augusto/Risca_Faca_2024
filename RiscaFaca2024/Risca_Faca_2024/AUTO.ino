@@ -2,6 +2,7 @@ void IRRead() {
   String value;
   if (irrecv.decode(&results))
   {
+    Serial.println(results.value);
     value = String(results.value, HEX);
     Serial.println(value);
     irrecv.resume();
@@ -10,6 +11,8 @@ void IRRead() {
     if (autoState == STOPPED) {
       //Serial.println("ReadyToGo");
       autoState = READY;
+      PS4.setLed(0, 100, 100);
+      PS4.sendToController();
       MotorWrite(90, 90);
       //CalibrateSensors();
     }
@@ -24,41 +27,63 @@ void IRRead() {
     if (autoState == RUNNING || autoState == READY) {
       //Serial.println("STOP");
       autoState = STOPPED;
+      PS4.setLed(100, 100, 0);
+      PS4.sendToController();
       MotorWrite(90, 90);
     }
   }
 }
-/*
-void Star() {
 
-  rightSensor = analogRead(rightSensorPin);
-  leftSensor = analogRead(leftSensorPin);
+// void Teste(){
+//   Serial.println("TesteStart");
+//   if (!desempate) {
+//     unsigned int timerStart = millis() + 300;
+//     while (timerStart > millis()) {
+//       MotorWrite(120, 120);
+//     }
+//   }
 
-  if (digitalRead(middleInfSensor)) {
-    MotorWrite(130, 130);
-  } else if (digitalRead(leftInfSensor)) {
-    MotorWrite(80, 95);
-    delay(100);
-  } else if (digitalRead(rightInfSensor)) {
-    MotorWrite(100, 80);
-    delay(100);
-  }
+//   while (autoState == RUNNING) {
+//     while ((digitalRead(middleInfSensor) && digitalRead(leftInfSensor) && digitalRead(rightInfSensor) ) && autoState == RUNNING) {
+//       //Serial.println("NotFind");
+//       IRRead();
+//       //Status_Verify();
+//       if (right) {
+//         MotorWrite(95, 110);
+//       } else {
+//         MotorWrite(110, 95);
+//       }
+//     }
+//     right = !right;
+//     while ((!digitalRead(middleInfSensor) && !digitalRead(!leftInfSensor) && !digitalRead(!rightInfSensor)) && autoState == RUNNING) {
 
-  if (leftSensor < leftSensorRef && rightSensor < rightSensorRef) {
-
-    MotorWrite(80, 80);
-    delay(200);
-    MotorWrite(100, 80);
-    delay(200);
-  } else if (leftSensor < leftSensorRef) {
-    MotorWrite(100, 80);
-  } else  if (rightSensor < rightSensorRef) {
-    MotorWrite(80, 95);
-  } else {
-    MotorWrite(110, 110);
-  }
-}*/
-
+//       if (!digitalRead(middleInfSensor)){
+//       //Serial.println("Find");
+//       IRRead();
+//       //Status_Verify();
+//       MotorWrite(150, 150);
+//       } else if (!digitalRead(!leftInfSensor)){
+//         while (digitalRead(middleInfSensor))
+//         {
+//           IRRead();
+//           MotorWrite(95, 110);
+//         }
+        
+//       } else if (!digitalRead(!rightInfSensor)){
+//           while (digitalRead(middleInfSensor))
+//         {
+//           IRRead();
+//           MotorWrite(110, 95);
+//         }
+//       }
+//     }
+//     while (autoState == STOPPED) {   
+//       IRRead();
+//       MotorWrite(0, 0);
+//       }
+//   }
+// }
+//
 void Movimentacao() {
   static int movimento = 0;
   static bool direcao = true; 
@@ -67,12 +92,12 @@ void Movimentacao() {
   leftInfSensor = digitalRead(leftInfSensor);
   middleInfSensor = digitalRead(middleInfSensor);
 
-  if (digitalRead(middleInfSensor)) {
+  if (digitalRead(middleInfSensor)==true) {
     MotorWrite(130, 130);
-  } else if (digitalRead(leftInfSensor)) {
+  } else if (digitalRead(leftInfSensor)==true) {
     MotorWrite(80, 95);
     delay(100);
-  } else if (digitalRead(rightInfSensor)) {
+  } else if (digitalRead(rightInfSensor)==true) {
     MotorWrite(100, 80);
     delay(100);
   }else if (digitalRead(leftInfSensorRef)) {
@@ -90,7 +115,7 @@ void Movimentacao() {
     //  delay(100);
     //}
     direcao = !direcao;
-  } else if(digitalRead(rightInfSensor)==false) {
+  } else if(digitalRead(middleInfSensor)) {
 
     
     do{
@@ -98,7 +123,7 @@ void Movimentacao() {
       MotorWrite(100,100);
       direcao = true;
     } else if (movimento < 1) {
-      MotorWrite(100, 100);
+      MotorWrite(80, 80);
       direcao = false;
     } else {
       movimento = 0; 
@@ -106,7 +131,7 @@ void Movimentacao() {
     movimento++;
     cont++;
     
-    } while(cont<=50 || digitalRead(rightInfSensor)==false );
+    } while(cont<=50 || digitalRead(middleInfSensor)==false );
     /*if (movimento < 2) {
       MotorWrite(100,100);
       direcao = true;
@@ -121,7 +146,7 @@ void Movimentacao() {
 }
 
 void Radar() {
-  //Serial.println("StarStart");
+  Serial.println("RadarStart");
   if (!desempate) {
     unsigned int timerStart = millis() + 300;
     while (timerStart > millis()) {
@@ -129,9 +154,8 @@ void Radar() {
     }
   }
 
- 
   while (autoState == RUNNING) {
-    while ((!digitalRead(rightInfSensor) && !digitalRead(leftInfSensor)) && autoState == RUNNING) {
+    while ((digitalRead(rightInfSensor) && digitalRead(leftInfSensor) && digitalRead(middleInfSensor)) && autoState == RUNNING) {
       //Serial.println("NotFind");
       IRRead();
       //Status_Verify();
@@ -142,24 +166,55 @@ void Radar() {
       }
     }
     right = !right;
-    while ((digitalRead(rightInfSensor) || digitalRead(leftInfSensor)) && autoState == RUNNING) {
+    while (!digitalRead(middleInfSensor) && autoState == RUNNING) {
       //Serial.println("Find");
       IRRead();
       //Status_Verify();
       MotorWrite(150, 150);
     }
+    while (autoState == STOPPED) {   
+      IRRead();
+      MotorWrite(0, 0);
+      }
   }
+}
+void Suicidio() {
+  Serial.println("SuicidioStart");
+  if (!desempate) {
+    unsigned int timerStart = millis() + 300;
+    while (timerStart > millis()) {
+      MotorWrite(120, 120);
+    }
+  }
+
+  while (autoState == RUNNING) {  
+      IRRead();
+      while(!digitalRead(middleInfSensor)){
+        IRRead();
+      MotorWrite(150, 150);
+      PS4.setLed(100, 0, 0);
+      PS4.sendToController();
+      }
+      }
+  while (autoState == STOPPED) {   
+      IRRead();
+      MotorWrite(0, 0);
+      }
 }
 
 void Auto() {
   IRRead();
+  if (PS4.Square()) {
+    Serial.println("MovimentacaoMode");
+    tatic = MOVIMENTACAO;
+  }
   if (PS4.Circle()) {
     Serial.println("RadarMode");
     tatic = RADAR;
   }
   if (PS4.Triangle()) {
-    Serial.println("Movimentacao");
-    tatic2 = MOVIMENTACAO;
+    Serial.println("SuicideMode");
+    tatic = SUICIDIO;
   }
   if (PS4.Right()) {
     Serial.println("Right");
@@ -179,13 +234,14 @@ void Auto() {
   }
 
   if (autoState == RUNNING) {
-    //if (tatic == STAR) {
-  //    Star();
-   // } else if (tatic == RADAR) {
+    if (tatic == SUICIDIO) {
+      Suicidio();
+    } else if (tatic == MOVIMENTACAO){
+      MOVIMENTACAO();
+    } else if (tatic == RADAR) {
       Radar();
-      Movimentacao();
- //   }
-
+ 
+  // Verify leds controll
   } else if (autoState == READY) {
     MotorWrite(90, 90);
     if (blinkTimer < millis()) {
@@ -216,8 +272,4 @@ void Auto() {
     }
   }
 }
-/*
-void CalibrateSensors() {
-  leftSensorRef = analogRead(leftSensorPin) - leftSensorTolerance;
-  rightSensorRef = analogRead(rightSensorPin) - rightSensorTolerance;
-}*/
+}
