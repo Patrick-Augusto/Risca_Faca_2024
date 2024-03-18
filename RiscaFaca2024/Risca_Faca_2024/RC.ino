@@ -20,14 +20,12 @@ void ManualControl() {
     forward = -63;
   }
 
-  int leftMotorOutput = constrain(map(forward, 0, 255, 90, 150)  - (map(backward, 0, 255, 0, 60) - (map(steering, -127, 127, 70, 110) - 90)), 30, 150);
-  int rightMotorOutput = constrain(map(forward, 0, 255, 90, 150) - (map(backward, 0, 255, 0, 60) + (map(steering, -127, 127, 70, 110) - 90)), 30, 150);
+  int leftMotorOutput = constrain(map(forward, 0, 255, 90, 150)  - (map(backward, 0, 255, 0, 60) - (map(steering, -127, 127, 70, 90) - 80)), 30, 150);
+  int rightMotorOutput = constrain(map(forward, 0, 255, 90, 150) - (map(backward, 0, 255, 0, 60) + (map(steering, -127, 127, 70, 90) - 80)), 30, 150);
   //Serial.println(map(steering, -127, 127, 30, 150)-90);
 
   MotorEsquerdo.write(leftMotorOutput);
   MotorDireito.write(rightMotorOutput);
-
-
 
   Serial.print(rightMotorOutput);
   Serial.print(" ");
