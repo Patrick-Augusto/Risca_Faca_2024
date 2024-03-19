@@ -178,6 +178,47 @@ void Radar() {
       }
   }
 }
+void RadarInverso() {
+  Serial.println("RadarInversoStart");
+  if (!desempate) {
+    unsigned int timerStart = millis() + 300;
+    while (timerStart > millis()) {
+      MotorWrite(120, 120);
+    }
+  }
+
+  while (autoState == RUNNING) {
+    // Verifica se os sensores identificam um robô adversário
+    if (digitalRead(rightInfSensor) == LOW || digitalRead(leftInfSensor) == LOW || digitalRead(middleInfSensor) == LOW) {
+      // Realiza uma volta de ré
+      while (digitalRead(middleInfSensor) == LOW && autoState == RUNNING) {
+        IRRead();
+        MotorWrite(-120, -120); // Marcha ré
+      }
+      delay(200); // Delay para garantir que a volta de ré foi completada
+    }
+    
+    // Avança para frente
+    while ((digitalRead(rightInfSensor) && digitalRead(leftInfSensor) && digitalRead(middleInfSensor)) && autoState == RUNNING) {
+      IRRead();
+      if (right) {
+        MotorWrite(95, 110);
+      } else {
+        MotorWrite(110, 95);
+      }
+    }
+    right = !right;
+    while (!digitalRead(middleInfSensor) && autoState == RUNNING) {
+      IRRead();
+      MotorWrite(150, 150);
+    }
+    while (autoState == STOPPED) {   
+      IRRead();
+      MotorWrite(0, 0);
+    }
+  }
+}
+
 void Suicidio() {
   Serial.println("SuicidioStart");
   if (!desempate) {
@@ -205,14 +246,18 @@ void Suicidio() {
 void Auto() {
   IRRead();
   if (PS4.Square()) {
-    Serial.println("MovimentacaoMode");
-    tatic = MOVIMENTACAO;
+    Serial.println("RadarInversoMode");
+    tatic = RADAR_INVERSO;
   }
   if (PS4.Circle()) {
     Serial.println("RadarMode");
     tatic = RADAR;
   }
   if (PS4.Triangle()) {
+    Serial.println("MovimentacaoMode");
+    tatic = MOVIMENTACAO;
+  }
+  if (PS4.Cross()) {
     Serial.println("SuicideMode");
     tatic = SUICIDIO;
   }
@@ -237,9 +282,11 @@ void Auto() {
     if (tatic == SUICIDIO) {
       Suicidio();
     } else if (tatic == MOVIMENTACAO){
-      MOVIMENTACAO();
+      Movimentacao();
     } else if (tatic == RADAR) {
       Radar();
+    } else if (tatic == RADAR_INVERSO) {
+      RadarInverso();
  
   // Verify leds controll
   } else if (autoState == READY) {
