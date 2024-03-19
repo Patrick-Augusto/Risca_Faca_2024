@@ -1,5 +1,4 @@
-// Code made by Nick
-// Contact: nicolas_castrosilva@outlook.com
+
 
 //Servo Libraries
 
@@ -55,7 +54,8 @@ autoStates autoState = STOPPED;
 enum tatics {
    RADAR,
    SUICIDIO,
-   MOVIMENTACAO
+   MOVIMENTACAO,
+   RADAR_INVERSO
    //TESTE
 };
 tatics tatic = RADAR;
